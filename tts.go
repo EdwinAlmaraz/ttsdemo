@@ -43,12 +43,12 @@ var csheetId string
 var csheetName string
 
 func init() {
-	flag.StringVar(&inputsheetId, "sheetid", "REPLACE_ME", "sheet ID to read input from")
+	flag.StringVar(&inputsheetId, "sheetid", "1meSlimHhqBJ2hATs2cpoWVxCgXb0Ewtb1twUjI6okE8", "sheet ID to read input from")
 	flag.StringVar(&inputsheetName, "name", "Sheet1", "which sheet in the spreadsheet (specified by ID) to read")
 	flag.StringVar(&inputsheetRange, "range", "A1", "sheets column to read for input to convert to speech")
 	flag.StringVar(&csheetName, "cname", "Sheet1", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
 	flag.StringVar(&csheetRange, "crange", "L1", "sheets column to write checksums, for detecting changes to input")
-	flag.StringVar(&csheetId, "csheetid", "REPLACE_ME", "sheet ID to read/write checksums")
+	flag.StringVar(&csheetId, "csheetid", "1meSlimHhqBJ2hATs2cpoWVxCgXb0Ewtb1twUjI6okE8", "sheet ID to read/write checksums")
 	flag.BoolVar(&dryrun, "dryrun", true, "Make no tts API calls, record no checksums, and output no files")
 	flag.BoolVar(&ignoreChecksums, "ignorechecksums", false, "Make tts API calls even if it appears we have done it before based on checksums")
 }
@@ -76,9 +76,8 @@ func main() {
 		},
 		// Build the voice request, select the language code
 		Voice: &texttospeechpb.VoiceSelectionParams{
-			LanguageCode: "ja-JP",
-			Name:         "ja-JP-Wavenet-C",
-			SsmlGender:   texttospeechpb.SsmlVoiceGender_MALE,
+			LanguageCode: "en-EN",			
+			SsmlGender:   texttospeechpb.SsmlVoiceGender_FEMALE,
 		},
 		// Select mp3 audio encoding
 		AudioConfig: &texttospeechpb.AudioConfig{
@@ -104,6 +103,8 @@ func main() {
 	// Example "sheet1!A1:A"
 	// This code assumes you're just reading one column, and that you want the whole column.
 	readRange := fmt.Sprintf("%s!%s:%s", inputsheetName, inputsheetRange, string(inputsheetRange[0]))
+	
+	//readRange :="Sheet1!A1:A"
 	lines, err := gsheets.RetrieveCells(ssrv, inputsheetId, readRange)
 	if err != nil {
 		log.Fatal(err)

@@ -42,8 +42,8 @@ func RetrieveCells(srv *sheets.Service, spreadsheetId string, readRange string) 
 	// Get data
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err == nil {
-		if len(resp.Values) == 0 {
-			fmt.Println("No data found.")
+		if len(resp.Values) == 0 {			
+			fmt.Println("No data found lol.")
 		} else {
 			fmt.Printf("Retreived cells %s from %s\n", readRange, spreadsheetId)
 			for _, row := range resp.Values {
