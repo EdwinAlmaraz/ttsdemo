@@ -27,7 +27,7 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/drive/v3"
+	// "google.golang.org/api/drive/v3"
 )
 
 // Retrieve a token, saves the token, then returns the generated client.
@@ -94,7 +94,7 @@ func Client() *http.Client {
 	// Create client. If you're having problems, delete the token.json file and run again.
 	config, err := google.ConfigFromJSON(b,
 		"https://www.googleapis.com/auth/spreadsheets",
-		drive.DriveFileScope)
+		"https://www.googleapis.com/auth/drive.file")
 
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)

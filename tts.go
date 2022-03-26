@@ -1,18 +1,18 @@
-// Copyright 2019 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// based on quickstart script at:
-// https://raw.githubusercontent.com/GoogleCloudPlatform/golang-samples/master/texttospeech/quickstart/quickstart.go
+// // Copyright 2019 Google LLC
+// //
+// // Licensed under the Apache License, Version 2.0 (the "License");
+// // you may not use this file except in compliance with the License.
+// // You may obtain a copy of the License at
+// //
+// //     https://www.apache.org/licenses/LICENSE-2.0
+// //
+// // Unless required by applicable law or agreed to in writing, software
+// // distributed under the License is distributed on an "AS IS" BASIS,
+// // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// // See the License for the specific language governing permissions and
+// // limitations under the License.
+// // based on quickstart script at:
+// // https://raw.githubusercontent.com/GoogleCloudPlatform/golang-samples/master/texttospeech/quickstart/quickstart.go
 package main
 
 import (
@@ -20,12 +20,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/joeholley/jp/internal/gdrive"
-	"github.com/joeholley/jp/internal/googleapis"
-	"github.com/joeholley/jp/internal/gsheets"
 	"hash/crc32"
 	"log"
 	"time"
+
+	"github.com/joeholley/jp/internal/gdrive"
+	"github.com/joeholley/jp/internal/googleapis"
+	"github.com/joeholley/jp/internal/gsheets"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	"google.golang.org/api/option"
@@ -39,22 +40,32 @@ var inputsheetId string
 var inputsheetRange string
 var inputsheetName string
 var csheetRange string
-var csheetId string
+
+//var csheetId string
 var csheetName string
+var lang string
+var voicename string
+var voicetype texttospeechpb.SsmlVoiceGender
+var voicetypestr string
+var mp3filenamesrange string
 
 func init() {
-	flag.StringVar(&inputsheetId, "sheetid", "REPLACE_ME", "sheet ID to read input from")
-	flag.StringVar(&inputsheetName, "name", "Sheet1", "which sheet in the spreadsheet (specified by ID) to read")
-	flag.StringVar(&inputsheetRange, "range", "A1", "sheets column to read for input to convert to speech")
-	flag.StringVar(&csheetName, "cname", "Sheet1", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
-	flag.StringVar(&csheetRange, "crange", "L1", "sheets column to write checksums, for detecting changes to input")
-	flag.StringVar(&csheetId, "csheetid", "REPLACE_ME", "sheet ID to read/write checksums")
+	flag.StringVar(&inputsheetId, "sheetid", "1iKGLxmU83DBY_v6GBJHWssjLh_Mzqm9djFsYGNDc1IM", "Google Sheets Document ID. Found in URL")
+	flag.StringVar(&inputsheetName, "sheetname", "Introduction", "which sheet in the spreadsheet (specified by ID) to read; Introduction is default")
+	flag.StringVar(&inputsheetRange, "range", "C2", "sheets column to read for input to convert to speech (starting cell) C2 is default")
+	flag.StringVar(&mp3filenamesrange, "filenamecolumn", "A2", "column used to label mp3 files.")
+	flag.StringVar(&lang, "lang", "en-US", "language code for text to speech; en-US is default")
+	flag.StringVar(&voicename, "voicename", "en-US-Wavenet-H", "name of the voice used; en-US-Wavenet-H is default")
+	flag.StringVar(&voicetypestr, "voicetypestr", "female", "the type of voice for the audio; female is default")
+	flag.StringVar(&csheetName, "cname", "CheckSums", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
+	flag.StringVar(&csheetRange, "crange", "L2", "sheets column to write checksums, for detecting changes to input")
+	//flag.StringVar(&csheetId, "csheetid", inputsheetId, "sheet ID to read/write checksums")
 	flag.BoolVar(&dryrun, "dryrun", true, "Make no tts API calls, record no checksums, and output no files")
 	flag.BoolVar(&ignoreChecksums, "ignorechecksums", false, "Make tts API calls even if it appears we have done it before based on checksums")
+	//csheetId = inputsheetId;
 }
 
 func main() {
-
 	flag.Parse()
 	crc32q := crc32.MakeTable(0xD5828281)
 	var folderId []string
@@ -67,6 +78,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if voicetypestr == "female" {
+		voicetype = texttospeechpb.SsmlVoiceGender_FEMALE
+	} else if voicetypestr == "male" {
+		voicetype = texttospeechpb.SsmlVoiceGender_MALE
+	}
+
 	// Set up the text-to-speech request on the text input with
 	// voice parameters and audio file type.
 	req := texttospeechpb.SynthesizeSpeechRequest{
@@ -76,9 +93,9 @@ func main() {
 		},
 		// Build the voice request, select the language code
 		Voice: &texttospeechpb.VoiceSelectionParams{
-			LanguageCode: "ja-JP",
-			Name:         "ja-JP-Wavenet-C",
-			SsmlGender:   texttospeechpb.SsmlVoiceGender_MALE,
+			LanguageCode: lang,
+			Name:         voicename,
+			SsmlGender:   voicetype,
 		},
 		// Select mp3 audio encoding
 		AudioConfig: &texttospeechpb.AudioConfig{
@@ -109,9 +126,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	readFilenameRange := fmt.Sprintf("%s!%s:%s", inputsheetName, mp3filenamesrange, string(mp3filenamesrange[0]))
+	mp3names, err := gsheets.RetrieveCells(ssrv, inputsheetId, readFilenameRange)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// get checksums from previous runs (if any) from the google sheet.
 	cRange := fmt.Sprintf("%s!%s:%s", csheetName, csheetRange, string(csheetRange[0]))
-	cResults, err := gsheets.RetrieveCells(ssrv, csheetId, cRange)
+	cResults, err := gsheets.RetrieveCells(ssrv, inputsheetId, cRange)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -148,7 +171,7 @@ func main() {
 			// We already made sure the checksums and lines arrays are the same length, when we retrieved
 			// the checksums from the spreadsheet.
 			if ignoreChecksums == true || curSum != checksums[index] {
-				mp3file := fmt.Sprintf("%s.mp3", curSum)
+				mp3file := fmt.Sprintf("%s.mp3", mp3names[index])
 				resp := &texttospeechpb.SynthesizeSpeechResponse{}
 
 				// Replace the placeholder text to synthesize
@@ -178,7 +201,7 @@ func main() {
 					}
 
 					// The resp's AudioContent is binary, use bytes IOReader to retrieve it
-					mp3file := fmt.Sprintf("%s.mp3", curSum)
+					mp3file := fmt.Sprintf("%s.mp3", mp3names[index])
 					gdrive.CreateFile(dsrv, folderId, mp3file, bytes.NewReader(resp.AudioContent))
 				}
 				fmt.Printf("output audio file: %v\n", mp3file)
@@ -195,8 +218,8 @@ func main() {
 	}
 	// write the latest checksums back out to the specified sheet (overwrites values in this column!!)
 	if dryrun == false {
-		fmt.Printf("attempting to write checksums to sheet %s\n", csheetId)
-		err = gsheets.WriteCells(ssrv, csheetId, cRange, checksums)
+		fmt.Printf("attempting to write checksums to sheet %s\n", inputsheetId)
+		err = gsheets.WriteCells(ssrv, inputsheetId, cRange, checksums)
 		if err != nil {
 			log.Fatal(err)
 		}
