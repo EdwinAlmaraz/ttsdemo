@@ -50,7 +50,7 @@ func RetrieveCells(srv *sheets.Service, spreadsheetId string, readRange string) 
 				// first retrieved column is index 0
 				results = append(results, row[0].(string))
 			}
-		}
+		}		
 	}
 	return results, err
 }

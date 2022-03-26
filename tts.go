@@ -42,12 +42,13 @@ var inputsheetName string
 var csheetRange string
 
 //var csheetId string
-var csheetName string
+//var csheetName string
 var lang string
 var voicename string
 var voicetype texttospeechpb.SsmlVoiceGender
 var voicetypestr string
 var mp3filenamesrange string
+var foldername string
 
 func init() {
 	flag.StringVar(&inputsheetId, "sheetid", "1iKGLxmU83DBY_v6GBJHWssjLh_Mzqm9djFsYGNDc1IM", "Google Sheets Document ID. Found in URL")
@@ -57,12 +58,12 @@ func init() {
 	flag.StringVar(&lang, "lang", "en-US", "language code for text to speech; en-US is default")
 	flag.StringVar(&voicename, "voicename", "en-US-Wavenet-H", "name of the voice used; en-US-Wavenet-H is default")
 	flag.StringVar(&voicetypestr, "voicetypestr", "female", "the type of voice for the audio; female is default")
-	flag.StringVar(&csheetName, "cname", "CheckSums", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
+	//flag.StringVar(&csheetName, "cname", "CheckSums", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
 	flag.StringVar(&csheetRange, "crange", "L2", "sheets column to write checksums, for detecting changes to input")
+	flag.StringVar(&foldername, "folder", "", "specify the folder name for the audio files to be created in drive (GPQ is default project)")
 	//flag.StringVar(&csheetId, "csheetid", inputsheetId, "sheet ID to read/write checksums")
 	flag.BoolVar(&dryrun, "dryrun", true, "Make no tts API calls, record no checksums, and output no files")
 	flag.BoolVar(&ignoreChecksums, "ignorechecksums", false, "Make tts API calls even if it appears we have done it before based on checksums")
-	//csheetId = inputsheetId;
 }
 
 func main() {
@@ -133,7 +134,7 @@ func main() {
 	}
 
 	// get checksums from previous runs (if any) from the google sheet.
-	cRange := fmt.Sprintf("%s!%s:%s", csheetName, csheetRange, string(csheetRange[0]))
+	cRange := fmt.Sprintf("%s!%s:%s", inputsheetName, csheetRange, string(csheetRange[0]))
 	cResults, err := gsheets.RetrieveCells(ssrv, inputsheetId, cRange)
 	if err != nil {
 		log.Fatal(err)
@@ -194,7 +195,12 @@ func main() {
 						t := time.Now().Local()
 						tstring := fmt.Sprintf("%d%02d%02d-%02d%02d", t.Year(), t.Month(), t.Day(),
 							t.Hour(), t.Minute())
-						folderId, err = gdrive.CreateFolder(dsrv, tstring)
+						if foldername == "" {
+							folderId, err = gdrive.CreateFolder(dsrv, tstring)
+						} else {
+							folderId, err = gdrive.CreateFolder(dsrv, foldername)
+						}
+
 						if err != nil || len(folderId) == 0 {
 							log.Fatal(err)
 						}
