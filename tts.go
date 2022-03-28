@@ -43,7 +43,7 @@ var csheetRange string
 
 //var csheetId string
 //var csheetName string
-//var lang string
+var lang string
 var voicename string
 
 //var voicetype texttospeechpb.SsmlVoiceGender
@@ -56,7 +56,7 @@ func init() {
 	flag.StringVar(&inputsheetName, "sheetname", "Introduction", "which sheet in the spreadsheet (specified by ID) to read")
 	flag.StringVar(&inputsheetRange, "range", "C2", "sheets column to read for input to convert to speech (starting cell)")
 	flag.StringVar(&mp3filenamesrange, "filenamecolumn", "A2", "column used to label mp3 files.")
-	//flag.StringVar(&lang, "lang", "en-US", "language code for text to speech")
+	flag.StringVar(&lang, "lang", "en-US", "language code for text to speech")
 	flag.StringVar(&voicename, "voicename", "en-US-Wavenet-H", "name of the voice used")
 	//flag.StringVar(&voicetypestr, "voicetypestr", "female", "the type of voice for the audio")
 	//flag.StringVar(&csheetName, "cname", "CheckSums", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
@@ -94,7 +94,7 @@ func main() {
 		},
 		// Build the voice request, select the language code
 		Voice: &texttospeechpb.VoiceSelectionParams{
-			//LanguageCode: lang,
+			LanguageCode: lang,
 			Name: voicename,
 			//SsmlGender:   voicetype,
 		},
