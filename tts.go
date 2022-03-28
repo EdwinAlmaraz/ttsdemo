@@ -43,27 +43,33 @@ var csheetRange string
 
 //var csheetId string
 //var csheetName string
-var lang string
+//var lang string
 var voicename string
-var voicetype texttospeechpb.SsmlVoiceGender
-var voicetypestr string
+
+//var voicetype texttospeechpb.SsmlVoiceGender
+//var voicetypestr string
 var mp3filenamesrange string
 var foldername string
 
 func init() {
 	flag.StringVar(&inputsheetId, "sheetid", "1iKGLxmU83DBY_v6GBJHWssjLh_Mzqm9djFsYGNDc1IM", "Google Sheets Document ID. Found in URL")
-	flag.StringVar(&inputsheetName, "sheetname", "Introduction", "which sheet in the spreadsheet (specified by ID) to read; Introduction is default")
-	flag.StringVar(&inputsheetRange, "range", "C2", "sheets column to read for input to convert to speech (starting cell) C2 is default")
+	flag.StringVar(&inputsheetName, "sheetname", "Introduction", "which sheet in the spreadsheet (specified by ID) to read")
+	flag.StringVar(&inputsheetRange, "range", "C2", "sheets column to read for input to convert to speech (starting cell)")
 	flag.StringVar(&mp3filenamesrange, "filenamecolumn", "A2", "column used to label mp3 files.")
-	flag.StringVar(&lang, "lang", "en-US", "language code for text to speech; en-US is default")
-	flag.StringVar(&voicename, "voicename", "en-US-Wavenet-H", "name of the voice used; en-US-Wavenet-H is default")
-	flag.StringVar(&voicetypestr, "voicetypestr", "female", "the type of voice for the audio; female is default")
+	//flag.StringVar(&lang, "lang", "en-US", "language code for text to speech")
+	flag.StringVar(&voicename, "voicename", "en-US-Wavenet-H", "name of the voice used")
+	//flag.StringVar(&voicetypestr, "voicetypestr", "female", "the type of voice for the audio")
 	//flag.StringVar(&csheetName, "cname", "CheckSums", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
 	flag.StringVar(&csheetRange, "crange", "L2", "sheets column to write checksums, for detecting changes to input")
-	flag.StringVar(&foldername, "folder", "", "specify the folder name for the audio files to be created in drive (GPQ is default project)")
+	flag.StringVar(&foldername, "folder", "", "specify the folder name for the audio files to be created in drive")
 	//flag.StringVar(&csheetId, "csheetid", inputsheetId, "sheet ID to read/write checksums")
 	flag.BoolVar(&dryrun, "dryrun", true, "Make no tts API calls, record no checksums, and output no files")
 	flag.BoolVar(&ignoreChecksums, "ignorechecksums", false, "Make tts API calls even if it appears we have done it before based on checksums")
+	// if voicetypestr == "female" {
+	// 	voicetype = texttospeechpb.SsmlVoiceGender_FEMALE
+	// } else if voicetypestr == "male" {
+	// 	voicetype = texttospeechpb.SsmlVoiceGender_MALE
+	// }
 }
 
 func main() {
@@ -79,12 +85,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if voicetypestr == "female" {
-		voicetype = texttospeechpb.SsmlVoiceGender_FEMALE
-	} else if voicetypestr == "male" {
-		voicetype = texttospeechpb.SsmlVoiceGender_MALE
-	}
-
 	// Set up the text-to-speech request on the text input with
 	// voice parameters and audio file type.
 	req := texttospeechpb.SynthesizeSpeechRequest{
@@ -94,9 +94,9 @@ func main() {
 		},
 		// Build the voice request, select the language code
 		Voice: &texttospeechpb.VoiceSelectionParams{
-			LanguageCode: lang,
-			Name:         voicename,
-			SsmlGender:   voicetype,
+			//LanguageCode: lang,
+			Name: voicename,
+			//SsmlGender:   voicetype,
 		},
 		// Select mp3 audio encoding
 		AudioConfig: &texttospeechpb.AudioConfig{
