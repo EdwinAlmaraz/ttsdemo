@@ -52,18 +52,16 @@ var mp3filenamesrange string
 var foldername string
 
 func init() {
-	flag.StringVar(&inputsheetId, "sheetid", "1CuWj8OzHUl5WYOkdgLKHqrQLRy1rbGaBlrdYK88fF04", "Google Sheets Document ID. Found in URL")
-	flag.StringVar(&inputsheetName, "sheetname", "array", "which sheet in the spreadsheet (specified by ID) to read")
+	flag.StringVar(&inputsheetId, "sheetid", "no ID given", "Google Sheets Document ID. Found in URL")
+	flag.StringVar(&inputsheetName, "sheetname", "captions", "which sheet in the spreadsheet (specified by ID) to read")
 	flag.StringVar(&inputsheetRange, "range", "C2", "sheets column to read for input to convert to speech (starting cell)")
 	flag.StringVar(&mp3filenamesrange, "filenamecolumn", "A2", "column used to label mp3 files.")
-	// flag.StringVar(&lang, "lang", "en-US", "language code for text to speech") // English code
-	// flag.StringVar(&voicename, "voicename", "en-US-Wavenet-H", "name of the voice used") // English
-	flag.StringVar(&lang, "lang", "es-US", "language code for text to speech")           // Spanish code
-	flag.StringVar(&voicename, "voicename", "es-US-Wavenet-B", "name of the voice used") // Spanish
+	flag.StringVar(&lang, "lang", "en-US", "language code for text to speech")           
+	flag.StringVar(&voicename, "voicename", "en-US-Wavenet-I", "name of the voice used") 
 	//flag.StringVar(&voicetypestr, "voicetypestr", "female", "the type of voice for the audio")
 	//flag.StringVar(&csheetName, "cname", "CheckSums", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
 	flag.StringVar(&csheetRange, "crange", "L2", "sheets column to write checksums, for detecting changes to input")
-	flag.StringVar(&foldername, "folder", "NewSpanishVO", "specify the folder name for the audio files to be created in drive")
+	flag.StringVar(&foldername, "folder", "Generated_VO", "specify the folder name for the audio files to be created in drive")
 	//flag.StringVar(&csheetId, "csheetid", inputsheetId, "sheet ID to read/write checksums")
 	flag.BoolVar(&dryrun, "dryrun", true, "Make no tts API calls, record no checksums, and output no files")
 	flag.BoolVar(&ignoreChecksums, "ignorechecksums", false, "Make tts API calls even if it appears we have done it before based on checksums")
@@ -201,6 +199,7 @@ func main() {
 							folderId, err = gdrive.CreateFolder(dsrv, tstring)
 						} else {
 							folderId, err = gdrive.CreateFolder(dsrv, foldername)
+							
 						}
 
 						if err != nil || len(folderId) == 0 {
