@@ -57,7 +57,7 @@ func init() {
 	flag.StringVar(&inputsheetRange, "range", "C2", "sheets column to read for input to convert to speech (starting cell)")
 	flag.StringVar(&mp3filenamesrange, "filenamecolumn", "A2", "column used to label mp3 files.")
 	flag.StringVar(&lang, "lang", "en-US", "language code for text to speech")           
-	flag.StringVar(&voicename, "voicename", "en-US-Wavenet-I", "name of the voice used") 
+	flag.StringVar(&voicename, "voicename", "en-US-Neural2-F", "name of the voice used") 
 	//flag.StringVar(&voicetypestr, "voicetypestr", "female", "the type of voice for the audio")
 	//flag.StringVar(&csheetName, "cname", "CheckSums", "which sheet 'tab' in the spreadsheet (specified by ID) to read/write checksums")
 	flag.StringVar(&csheetRange, "crange", "L2", "sheets column to write checksums, for detecting changes to input")
